@@ -19,10 +19,11 @@ type authUseCase struct {
 func NewAuthUseCase(repo repository.UserRepository, jwtSecret []byte) *authUseCase {
 	return &authUseCase{repo: repo, jwtSecret: jwtSecret}
 }
-func (a authUseCase) Register(ctx context.Context, user *domain.RegisterRequest) (string, error) {
-	if user.Username == "" || user.Password == "" {
-		return " ", errors.New("username or password is empty")
+func (a *authUseCase) Register(ctx context.Context, user *domain.RegisterRequest) error {
+	ExistingUser, err := a.repo.GetUserByUsername(ctx, user.Username)
+	if err == nil {
+		return errors.New("User already exists")
 	}
-	if user.Email == "" || user.Password == "" {
-	}
+	return ExistingUser, nil
+
 }
