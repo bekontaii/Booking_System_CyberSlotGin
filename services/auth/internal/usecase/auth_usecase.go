@@ -61,5 +61,23 @@ func (a *authUseCase) Register(ctx context.Context, user *domain.RegisterRequest
 	return nil
 }
 func (a *authUseCase) Login(ctx context.Context, user *domain.LoginRequest) (string, error) {
-
+	foundUser, err := a.repo.GetUserByUsername(ctx, user.Username)
+	if err != nil {
+		return "", ErrInvalidCredentials
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(foundUser.PasswordHash), []byte(user.Password))
+	if err != nil {
+		return "", ErrInvalidCredentials
+	}
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+	claims["id"] = foundUser.ID
+	claims["username"] = foundUser.Username
+	claims["role"] = foundUser.Role
+	tokenString, err := token.SignedString(a.jwtSecret)
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
 }
