@@ -19,8 +19,9 @@ type authUseCase struct {
 	jwtSecret []byte
 }
 
-func NewAuthUseCase(repo repository.UserRepository, jwtSecret []byte) *authUseCase {
-	return &authUseCase{repo: repo, jwtSecret: jwtSecret}
+func NewAuthUseCase(repo repository.UserRepository, jwtSecret []byte) authUseCase {
+	return authUseCase{repo: repo,
+		jwtSecret: jwtSecret}
 }
 
 func (a *authUseCase) Register(ctx context.Context, user *domain.RegisterRequest) error {
