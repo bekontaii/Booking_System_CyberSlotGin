@@ -1,0 +1,1 @@
+module github.com/bekontaii/Booking_System_CyberSlotGin/services
