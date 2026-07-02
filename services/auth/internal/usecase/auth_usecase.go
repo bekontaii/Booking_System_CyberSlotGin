@@ -73,6 +73,7 @@ func (a *authUseCase) Login(ctx context.Context, user *domain.LoginRequest) (str
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+	claims["iat"] = time.Now().Unix()
 	claims["id"] = foundUser.ID
 	claims["username"] = foundUser.Username
 	claims["role"] = foundUser.Role

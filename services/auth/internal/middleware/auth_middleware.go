@@ -1,35 +1,60 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
+	"errors"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware(jwtSecret []byte) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.Request.Header.Get("Authorization")
+
+		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "authorization header is required"})
 			c.Abort()
 			return
 		}
-		parts := strings.Split(authHeader, " ")
-		if len(parts) != 2 {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is invalid"})
+
+		parts := strings.SplitN(authHeader, " ", 2)
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid authorization header"})
 			c.Abort()
 			return
 		}
-		if parts[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is invalid"})
-			c.Abort()
-			return
-		}
+
 		tokenString := parts[1]
-		if tokenString == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is invalid"})
+
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+
+			// Проверяем алгоритм подписи
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, errors.New("unexpected signing method")
+			}
+
+			return jwtSecret, nil
+		})
+
+		if err != nil || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 			c.Abort()
 			return
 		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token claims"})
+			c.Abort()
+			return
+		}
+
+		c.Set("userID", claims["id"])
+		c.Set("username", claims["username"])
+		c.Set("role", claims["role"])
+
+		c.Next()
 	}
 }
