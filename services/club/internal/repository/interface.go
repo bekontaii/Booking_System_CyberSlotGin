@@ -7,7 +7,7 @@ import (
 
 type ClubRepository interface {
 	CreateClub(ctx context.Context, club *domain.Club) error
-	GetClub(ctx context.Context, clubID int64) (*domain.Club, error)
+	GetClubByID(ctx context.Context, clubID int64) (*domain.Club, error)
 	UpdateClub(ctx context.Context, club *domain.Club) error
 	DeleteClub(ctx context.Context, clubID int64) error
 	GetAllClubs(ctx context.Context) ([]domain.Club, error)
