@@ -58,4 +58,20 @@ func (r *MemoryClubRepository) UpdateClub(ctx context.Context,club *domain.Club)
 		if !ok {
 			return errors.New("club not found")
 		}
+		createdAt := existingClub.CreatedAt
+		*existingClub = *club
+		existingClub.CreatedAt = createdAt
+		existingClub.UpdatedAt = time.Now()
+		return nil
+}
+func (r *MemoryClubRepository) DeleteClub(ctx context.Context,clubID int64) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	foundClub,ok := r.clubs[clubID]
+	if !ok{
+		return errors.New("club not found")
+	}
+	delete(r.clubs,foundClub.ID)
+	return nil
+
 }
