@@ -9,12 +9,12 @@ import (
 )
 
 type AuthHandler struct {
-	authUC usecase.AuthUseCase
+	clubUC usecase.AuthUseCase
 }
 
-func NewAuthHandler(authUC usecase.AuthUseCase) *AuthHandler {
+func NewAuthHandler(clubUC usecase.AuthUseCase) *AuthHandler {
 	return &AuthHandler{
-		authUC: authUC,
+		clubUC: clubUC,
 	}
 }
 func (h *AuthHandler) Register(c *gin.Context) {
