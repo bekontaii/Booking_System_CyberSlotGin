@@ -5,7 +5,6 @@ import (
 
 	"github.com/bekontaii/Booking_System_CyberSlotGin/services/internal/domain"
 	"github.com/bekontaii/Booking_System_CyberSlotGin/services/internal/repository"
-	"golang.org/x/net/context/ctxhttp"
 )
 
 type ClubUseCase interface{
